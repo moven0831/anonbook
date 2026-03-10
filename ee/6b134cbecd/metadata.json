@@ -3,7 +3,7 @@
   "checkpoint_id": "ee6b134cbecd",
   "strategy": "manual-commit",
   "branch": "dev",
-  "checkpoints_count": 3,
+  "checkpoints_count": 4,
   "files_touched": [
     ".yarn/install-state.gz",
     "CLAUDE.md",
@@ -16,13 +16,20 @@
       "context": "/ee/6b134cbecd/0/context.md",
       "content_hash": "/ee/6b134cbecd/0/content_hash.txt",
       "prompt": "/ee/6b134cbecd/0/prompt.txt"
+    },
+    {
+      "metadata": "/ee/6b134cbecd/1/metadata.json",
+      "transcript": "/ee/6b134cbecd/1/full.jsonl",
+      "context": "/ee/6b134cbecd/1/context.md",
+      "content_hash": "/ee/6b134cbecd/1/content_hash.txt",
+      "prompt": "/ee/6b134cbecd/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 22,
-    "cache_creation_tokens": 22763,
-    "cache_read_tokens": 339534,
-    "output_tokens": 2821,
-    "api_call_count": 14
+    "input_tokens": 41,
+    "cache_creation_tokens": 44333,
+    "cache_read_tokens": 635323,
+    "output_tokens": 5015,
+    "api_call_count": 27
   }
 }
