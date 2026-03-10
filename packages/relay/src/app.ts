@@ -2,12 +2,6 @@ import express from 'express'
 import { createDb } from './db'
 import { config } from './config'
 
-// Scaffold routes (kept for backwards compatibility)
-import appconfig from './routes/appconfig'
-import scaffoldSignup from './routes/signup'
-import scaffoldRequest from './routes/request'
-import transition from './routes/transition'
-
 // Anonbook routes
 import { signupRouter } from './routes/anonbook-signup'
 import { attestRouter } from './routes/anonbook-attest'
@@ -30,12 +24,6 @@ app.use('*', (req, res, next) => {
     res.set('access-control-allow-headers', '*')
     next()
 })
-
-// Scaffold routes
-app.use('/', appconfig)
-app.use('/', scaffoldSignup)
-app.use('/', scaffoldRequest)
-app.use('/', transition)
 
 // Anonbook Karma Bridge routes
 const db = createDb(config.dbPath)

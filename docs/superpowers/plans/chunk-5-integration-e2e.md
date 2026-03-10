@@ -64,8 +64,7 @@ git commit -m "feat: add .env.example and document Moltbook bot setup"
 
 Terminal 1: `yarn contracts hardhat node`
 Terminal 2: `yarn contracts deploy` (note the printed addresses)
-Terminal 3: `UNIREP_ADDRESS=<addr> KARMA_BRIDGE_ADDRESS=<addr> yarn relay start`
-Terminal 4: `cd packages/frontend && npx tsx src/index.tsx`
+Terminal 3: `UNIREP_ADDRESS=<addr> KARMA_BRIDGE_ADDRESS=<addr> yarn relay start`Terminal 4: `cd packages/frontend && npx tsx src/index.tsx`
 
 - [ ] **Step 2: Test signup**
 

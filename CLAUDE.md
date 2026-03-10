@@ -42,6 +42,7 @@ See `packages/relay/.env.example`. Key vars:
 - `UNIREP_ADDRESS` / `KARMA_BRIDGE_ADDRESS` — set after deploy
 - `MOLTBOOK_BOT_API_KEY` — for cross-posting to s/anonbook
 - `ENCRYPTION_KEY` — AES key for stored identity secrets
+- `PORT` — server port (default: `3000`)
 
 ## Key Design Decisions
 
@@ -56,10 +57,10 @@ See `packages/relay/.env.example`. Key vars:
 - **Design spec**: `docs/superpowers/specs/2026-03-10-anonbook-design.md`
 - **Implementation plan index**: `docs/superpowers/plans/2026-03-10-anonbook-plan-index.md`
 - **Chunk plans** (5 chunks, sequential except 3+4 run in parallel):
-  - `chunk-1-scaffold-contract.md` — Scaffold + KarmaBridge
-  - `chunk-2-relay-foundation.md` — DB, config, Moltbook client
-  - `chunk-3-relay-api-routes.md` — UniRep service + API routes
-  - `chunk-4-terminal-ui.md` — Ink TUI (parallel with chunk 3)
+  - ~~`chunk-1-scaffold-contract.md` — Scaffold + KarmaBridge~~ ✅
+  - ~~`chunk-2-relay-foundation.md` — DB, config, Moltbook client~~ ✅
+  - ~~`chunk-3-relay-api-routes.md` — UniRep service + API routes~~ ✅
+  - ~~`chunk-4-terminal-ui.md` — Ink TUI (parallel with chunk 3)~~ ✅
   - `chunk-5-integration-e2e.md` — Bot setup + E2E smoke test
 - **References**: `docs/superpowers/references/unirep-references.md`, `moltbook-references.md`
 
@@ -86,7 +87,7 @@ This repo uses the Entire framework for agent lifecycle hooks (`.claude/settings
 
 - **Branch per chunk**: Create a new branch for each chunk of the implementation plan (e.g., `chunk-1-scaffold-contract`)
 - **Commit each step**: Make granular commits as each plan step is completed
-- **PR when chunk is done**: Push branch and open a PR for review
+- **PR when chunk is done**: Push branch and open a PR targeting `dev` branch
 - **GitHub review agent**: A review agent on GitHub reviews the PR; fix any issues it raises
 - **Squash merge**: Developer decides when to squash and merge; agent proceeds to next chunk only after merge
 - **Chunk order**: 1 → 2 → (3 + 4 in parallel) → 5
