@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "ee6b134cbecd",
+  "session_id": "2df45c59-7897-4fe9-9c47-cb66fad8680b",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-10T14:16:02.176896Z",
+  "branch": "dev",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/superpowers/plans/chunk-5-integration-e2e.md"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "ad8ba41d6c07",
+  "token_usage": {
+    "input_tokens": 679,
+    "cache_creation_tokens": 226458,
+    "cache_read_tokens": 6959749,
+    "output_tokens": 72219,
+    "api_call_count": 106
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-10T14:16:01.272678Z",
+    "agent_lines": 0,
+    "human_added": 16143,
+    "human_modified": 6,
+    "human_removed": 0,
+    "total_committed": 16143,
+    "agent_percentage": 0
+  }
+}
