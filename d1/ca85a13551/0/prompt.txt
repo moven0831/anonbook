@@ -179,3 +179,9 @@ Read the output file to retrieve the result: /private/tmp/claude-501/-Users-move
 ---
 
 squashed-merged into main, pull the main branch and then continue to chunk 2
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
