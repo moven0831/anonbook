@@ -1,6 +1,7 @@
 {
     "name": "@unirep-app/frontend",
     "version": "1.0.0",
+    "type": "module",
     "description": "Anonbook terminal UI",
     "license": "ISC",
     "scripts": {
