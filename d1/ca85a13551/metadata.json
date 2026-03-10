@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "d1ca85a13551",
+  "strategy": "manual-commit",
+  "branch": "chunk-2-relay-foundation",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "packages/relay/src/services/moltbook.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/d1/ca85a13551/0/metadata.json",
+      "transcript": "/d1/ca85a13551/0/full.jsonl",
+      "context": "/d1/ca85a13551/0/context.md",
+      "content_hash": "/d1/ca85a13551/0/content_hash.txt",
+      "prompt": "/d1/ca85a13551/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 84,
+    "cache_creation_tokens": 95406,
+    "cache_read_tokens": 5264150,
+    "output_tokens": 18443,
+    "api_call_count": 69
+  }
+}
