@@ -153,6 +153,8 @@ describe('KarmaBridge', function () {
 
 Note: The exact prover import path depends on the UniRep version the scaffold installs. Check the scaffold's existing tests in `packages/contracts/test/` after scaffolding. Common alternatives: `@unirep/circuits/provers/defaultProver` or a local prover setup. The `defaultProver` uses Node.js snarkjs which is suitable for testing.
 
+**Semaphore Identity version note**: The `@semaphore-protocol/identity` API changed between v3 and v4 (constructor, serialization/deserialization methods). After scaffolding, verify which version is installed and adapt `new Identity()`, serialization (`identity.toString()` vs other methods), and deserialization patterns accordingly.
+
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash

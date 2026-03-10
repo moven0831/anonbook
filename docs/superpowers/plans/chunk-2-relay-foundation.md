@@ -354,7 +354,27 @@ export interface MoltbookAgent {
   description: string
 }
 
+/**
+ * Dev mode: when no MOLTBOOK_BOT_API_KEY is set, return a stub agent
+ * derived from the provided API key string. This lets the full stack
+ * work end-to-end without a real Moltbook account.
+ */
+function devAgent(apiKey: string): MoltbookAgent {
+  const crypto = require('crypto')
+  const hash = crypto.createHash('sha256').update(apiKey).digest('hex').slice(0, 8)
+  return {
+    name: `dev-agent-${hash}`,
+    karma: 100, // enough to test all tiers except legend
+    description: 'Dev mode stub agent',
+  }
+}
+
 export async function getAgent(apiKey: string): Promise<MoltbookAgent> {
+  // Dev mode: no real Moltbook API key configured
+  if (!config.moltbookBotApiKey) {
+    return devAgent(apiKey)
+  }
+
   const res = await fetch(`${config.moltbookBaseUrl}/agents/me`, {
     headers: { Authorization: `Bearer ${apiKey}` },
   })
@@ -394,6 +414,9 @@ Create `packages/relay/src/services/crosspost.ts`:
 ```typescript
 import { config } from '../config'
 
+const CROSSPOST_COOLDOWN_MS = 30 * 60 * 1000 // 30 minutes
+let lastCrosspostTime = 0
+
 export async function crosspostToMoltbook(post: {
   title: string
   content: string
@@ -403,6 +426,13 @@ export async function crosspostToMoltbook(post: {
 }): Promise<void> {
   if (!config.moltbookBotApiKey) {
     console.log('[crosspost] No bot API key configured, skipping')
+    return
+  }
+
+  const now = Date.now()
+  if (now - lastCrosspostTime < CROSSPOST_COOLDOWN_MS) {
+    console.log('[crosspost] Cooldown active, skipping (next allowed in %ds)',
+      Math.ceil((CROSSPOST_COOLDOWN_MS - (now - lastCrosspostTime)) / 1000))
     return
   }
 
@@ -425,7 +455,9 @@ export async function crosspostToMoltbook(post: {
       }),
     })
 
-    if (!res.ok) {
+    if (res.ok) {
+      lastCrosspostTime = Date.now()
+    } else {
       const body = await res.json().catch(() => ({}))
       console.error('[crosspost] Moltbook post failed:', body.error || res.status)
 
