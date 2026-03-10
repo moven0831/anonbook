@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "a95d9d81f99e",
+  "strategy": "manual-commit",
+  "branch": "chunk-2-relay-foundation",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "packages/relay/src/services/crosspost.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/a9/5d9d81f99e/0/metadata.json",
+      "transcript": "/a9/5d9d81f99e/0/full.jsonl",
+      "context": "/a9/5d9d81f99e/0/context.md",
+      "content_hash": "/a9/5d9d81f99e/0/content_hash.txt",
+      "prompt": "/a9/5d9d81f99e/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 85,
+    "cache_creation_tokens": 95628,
+    "cache_read_tokens": 5372058,
+    "output_tokens": 18590,
+    "api_call_count": 70
+  }
+}
