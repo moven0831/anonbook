@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "abf4f2e60f3f",
+  "session_id": "18d58335-7188-4a3b-8f67-59f18047b448",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-10T09:14:45.397679Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/superpowers/plans/chunk-1-scaffold-contract.md",
+    "docs/superpowers/plans/chunk-2-relay-foundation.md",
+    "docs/superpowers/plans/chunk-3-relay-api-routes.md",
+    "docs/superpowers/specs/2026-03-10-anonbook-design.md"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "80100bdfc950",
+  "token_usage": {
+    "input_tokens": 85,
+    "cache_creation_tokens": 75570,
+    "cache_read_tokens": 3027273,
+    "output_tokens": 12335,
+    "api_call_count": 50
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-10T09:14:45.102883Z",
+    "agent_lines": 94,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 94,
+    "agent_percentage": 100
+  }
+}
