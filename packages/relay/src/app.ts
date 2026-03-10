@@ -7,8 +7,6 @@ import { signupRouter } from './routes/anonbook-signup'
 import { attestRouter } from './routes/anonbook-attest'
 import { postRouter } from './routes/anonbook-post'
 import { feedRouter } from './routes/anonbook-feed'
-import { devRouter } from './routes/dev'
-
 require('dotenv').config()
 
 const app = express()
@@ -35,6 +33,8 @@ app.use('/api', feedRouter(db))
 
 // Dev-only routes (epoch advancement for testing)
 if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { devRouter } = require('./routes/dev')
     app.use('/api', devRouter())
 }
 

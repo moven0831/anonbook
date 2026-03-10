@@ -20,7 +20,7 @@ export function devRouter(): Router {
             const epochLength = await unirep.attesterEpochLength(
                 config.karmaBridgeAddress
             )
-            await provider.send('evm_increaseTime', [Number(epochLength)])
+            await provider.send('evm_increaseTime', [Number(epochLength) + 1])
             await provider.send('evm_mine', [])
 
             res.json({ success: true, advancedSeconds: Number(epochLength) })
