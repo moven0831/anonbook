@@ -81,3 +81,17 @@ See `packages/relay/.env.example`. Key vars:
 ## Hooks
 
 This repo uses the Entire framework for agent lifecycle hooks (`.claude/settings.json`). Do not modify `.entire/metadata/`.
+
+## Implementation Workflow
+
+- **Branch per chunk**: Create a new branch for each chunk of the implementation plan (e.g., `chunk-1-scaffold-contract`)
+- **Commit each step**: Make granular commits as each plan step is completed
+- **PR when chunk is done**: Push branch and open a PR for review
+- **GitHub review agent**: A review agent on GitHub reviews the PR; fix any issues it raises
+- **Squash merge**: Developer decides when to squash and merge; agent proceeds to next chunk only after merge
+- **Chunk order**: 1 → 2 → (3 + 4 in parallel) → 5
+
+## Gotchas
+
+- UniRep docs at `developer.unirep.io` may return 404 — use Context7 MCP tool (`resolve-library-id` + `query-docs`) as fallback
+- `create-unirep-app` scaffold generates a React frontend; chunk 4 replaces it with Ink TUI
