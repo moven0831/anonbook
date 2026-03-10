@@ -28,6 +28,28 @@ import { ethers } from 'ethers'
 import { config } from '../config'
 import crypto from 'crypto'
 
+// --- Auto User State Transition ---
+// UniRep requires a state transition when a new epoch starts before
+// reputation from previous epochs can be used. This helper checks and
+// performs the transition transparently so agents never think about epochs.
+async function ensureStateTransition(userState: UserState): Promise<void> {
+  const currentEpoch = await userState.latestTransitionedEpoch()
+  const onChainEpoch = await userState.sync.loadCurrentEpoch()
+  if (currentEpoch < onChainEpoch) {
+    const { publicSignals, proof } = await userState.genUserStateTransitionProof()
+    const provider = new ethers.providers.JsonRpcProvider(config.provider)
+    const wallet = new ethers.Wallet(config.privateKey, provider)
+    const unirep = new ethers.Contract(
+      config.unirepAddress,
+      ['function userStateTransition(uint256[] memory publicSignals, uint256[8] memory proof) public'],
+      wallet
+    )
+    const tx = await unirep.userStateTransition(publicSignals, proof)
+    await tx.wait()
+    await userState.waitForSync()
+  }
+}
+
 // Simple AES-256-GCM encryption for identity storage
 export function encryptIdentity(identitySecret: string, key: string): string {
   const iv = crypto.randomBytes(16)
@@ -69,7 +91,7 @@ export function loadIdentity(secret: string): Identity {
 }
 
 export async function createUserState(identity: Identity): Promise<UserState> {
-  const provider = new ethers.JsonRpcProvider(config.provider)
+  const provider = new ethers.providers.JsonRpcProvider(config.provider)
   const userState = new UserState({
     prover: defaultProver,
     unirepAddress: config.unirepAddress,
@@ -84,6 +106,8 @@ export async function createUserState(identity: Identity): Promise<UserState> {
 ```
 
 Note: The exact `Identity` and `UserState` constructor signatures may differ based on the UniRep version the scaffold installs. Adapt from the scaffold's existing code. Key reference files: `packages/relay/src/` in the scaffold.
+
+**Important**: The `ensureStateTransition` helper must be called before any proof generation in the attest and post routes. This makes epoch transitions transparent to agents. The exact `loadCurrentEpoch` method may differ — check the scaffold's Synchronizer API.
 
 - [ ] **Step 2: Commit**
 
@@ -228,7 +252,7 @@ export function signupRouter(db: Database): Router {
         const { publicSignals, proof } = await userState.genUserSignUpProof()
 
         // Submit on-chain
-        const provider = new ethers.JsonRpcProvider(config.provider)
+        const provider = new ethers.providers.JsonRpcProvider(config.provider)
         const wallet = new ethers.Wallet(config.privateKey, provider)
         const karmaBridge = new ethers.Contract(
           config.karmaBridgeAddress,
@@ -304,7 +328,7 @@ import { Router } from 'express'
 import { Database } from '../db'
 import { config } from '../config'
 import { getAgent } from '../services/moltbook'
-import { decryptIdentity, loadIdentity, createUserState } from '../services/unirep'
+import { decryptIdentity, loadIdentity, createUserState, ensureStateTransition } from '../services/unirep'
 import { ethers } from 'ethers'
 
 export function attestRouter(db: Database): Router {
@@ -330,16 +354,17 @@ export function attestRouter(db: Database): Router {
       const secret = decryptIdentity(stored.encryptedIdentity, config.encryptionKey)
       const identity = loadIdentity(secret)
 
-      // Build UserState and generate epoch key proof
+      // Build UserState, auto-transition if needed, then generate proof
       const userState = await createUserState(identity)
       try {
+        await ensureStateTransition(userState)
         const { publicSignals, proof } = await userState.genEpochKeyProof({
           attesterId: BigInt(config.karmaBridgeAddress),
         })
         const epoch = await userState.latestTransitionedEpoch()
 
         // Submit attestation on-chain
-        const provider = new ethers.JsonRpcProvider(config.provider)
+        const provider = new ethers.providers.JsonRpcProvider(config.provider)
         const wallet = new ethers.Wallet(config.privateKey, provider)
         const karmaBridge = new ethers.Contract(
           config.karmaBridgeAddress,
@@ -406,7 +431,7 @@ import { Router } from 'express'
 import { Database } from '../db'
 import { config } from '../config'
 import { getAgent } from '../services/moltbook'
-import { decryptIdentity, loadIdentity, createUserState } from '../services/unirep'
+import { decryptIdentity, loadIdentity, createUserState, ensureStateTransition } from '../services/unirep'
 import { isValidTier, getTierThreshold, TierName } from '../tiers'
 import { crosspostToMoltbook } from '../services/crosspost'
 import crypto from 'crypto'
@@ -448,6 +473,9 @@ export function postRouter(db: Database): Router {
       const userState = await createUserState(identity)
 
       try {
+        // Auto-transition if new epoch started
+        await ensureStateTransition(userState)
+
         // Generate reputation proof: prove posRep >= tier threshold
         const threshold = getTierThreshold(tier as TierName)
         const { publicSignals, proof } = await userState.genProveReputationProof({
