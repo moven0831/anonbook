@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "9dcf4f646e5c",
+  "strategy": "manual-commit",
+  "branch": "fix/epoch-advance-dev-endpoint",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "packages/relay/src/app.ts",
+    "packages/relay/src/routes/anonbook-signup.ts",
+    "packages/relay/src/routes/dev.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/9d/cf4f646e5c/0/metadata.json",
+      "transcript": "/9d/cf4f646e5c/0/full.jsonl",
+      "context": "/9d/cf4f646e5c/0/context.md",
+      "content_hash": "/9d/cf4f646e5c/0/content_hash.txt",
+      "prompt": "/9d/cf4f646e5c/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 12,
+    "cache_creation_tokens": 16565,
+    "cache_read_tokens": 195540,
+    "output_tokens": 1859,
+    "api_call_count": 9
+  }
+}

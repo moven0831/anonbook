@@ -1,0 +1,135 @@
+Implement the following plan:
+
+# Fix: Reputation proof fails — attestation not provable in same epoch
+
+## Context
+
+After signup and attest both succeed, `POST /api/post` fails with circom error `Error in template Reputation_92 line: 139`. This is because UniRep attestations from the **current epoch** aren't provable until a state transition into the next epoch. With `epochLength = 3600` (1 hour) in the deploy script, E2E testing is impractical — you'd have to wait an hour between attest and post.
+
+The `ensureStateTransition()` in the post route already handles transitioning if the on-chain epoch has advanced, but it can't help if the epoch hasn't changed yet.
+
+## Fix (1 change)
+
+### Add `/api/dev/advance-epoch` dev-only endpoint
+
+**New file**: `packages/relay/src/routes/dev.ts`
+
+Add a dev-only endpoint that queries the attester's epoch length from the UniRep contract, then calls Hardhat's `evm_increaseTime` + `evm_mine` to advance the epoch:
+
+```ts
+router.post('/dev/advance-epoch', async (req, res) => {
+    const provider = new ethers.providers.JsonRpcProvider(config.provider)
+    const unirep = new ethers.Contract(config.unirepAddress, [...], provider)
+    const epochLength = await unirep.attesterEpochLength(config.karmaBridgeAddress)
+    await provider.send('evm_increaseTime', [Number(epochLength)])
+    await provider.send('evm_mine', [])
+    res.json({ success: true })
+})
+```
+
+Only mount this route when `NODE_ENV !== 'production'`.
+
+## Updated E2E flow
+
+```bash
+# 1. Signup
+curl -X POST http://127.0.0.1:3000/api/signup -H "Content-Type: application/json" -d '{"moltbookApiKey":"Ysdfnlenfafe"}'
+
+# 2. Attest karma
+curl -X POST http://127.0.0.1:3000/api/attest -H "Content-Type: application/json" -d '{"moltbookApiKey":"Ysdfnlenfafe"}'
+
+# 3. Advance epoch (dev only — triggers state transition on next request)
+curl -X POST http://127.0.0.1:3000/api/dev/advance-epoch
+
+# 4. Post (ensureStateTransition will now transition to new epoch, making karma provable)
+curl -X POST http://127.0.0.1:3000/api/post -H "Content-Type: application/json" -d '{"moltbookApiKey":"Ysdfnlenfafe","title":"First Post","content":"Hello from the anonymous world!","tier":"newcomer"}'
+
+# 5. Read feed
+curl http://127.0.0.1:3000/api/posts
+```
+
+## Files to modify
+
+| File | Change |
+|------|--------|
+| `packages/relay/src/routes/dev.ts` | New dev-only route for advancing epoch |
+| `packages/relay/src/app.ts` | Mount dev router when not production (after line 33) |
+
+## Verification
+
+1. Fresh Hardhat node + `yarn contracts deploy`
+2. Delete old DB files: `rm packages/relay/anonbook.db*`
+3. Start relay
+4. Run all 5 curl commands above in sequence
+5. Step 4 should return `{"success":true,"postId":...}`
+6. Step 5 should show the post in the feed
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/moventsai/.claude/projects/-Users-moventsai-Projects-mine-anonbook/c03564a9-50cd-42f8-99f6-a500dba44ef1.jsonl
+
+---
+
+## Context
+
+- Current git status: On branch fix/epoch-advance-dev-endpoint
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/app.ts
+	modified:   src/routes/anonbook-signup.ts
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	anonbook.db
+	anonbook.db-shm
+	anonbook.db-wal
+	src/routes/dev.ts
+
+no changes added to commit (use "git add" and/or "git commit -a")
+- Current git diff (staged and unstaged changes): diff --git a/packages/relay/src/app.ts b/packages/relay/src/app.ts
+index 45f7336..518bfaa 100644
+--- a/packages/relay/src/app.ts
++++ b/packages/relay/src/app.ts
+@@ -7,6 +7,7 @@ import { signupRouter } from './routes/anonbook-signup'
+ import { attestRouter } from './routes/anonbook-attest'
+ import { postRouter } from './routes/anonbook-post'
+ import { feedRouter } from './routes/anonbook-feed'
++import { devRouter } from './routes/dev'
+ 
+ require('dotenv').config()
+ 
+@@ -32,4 +33,9 @@ app.use('/api', attestRouter(db))
+ app.use('/api', postRouter(db))
+ app.use('/api', feedRouter(db))
+ 
++// Dev-only routes (epoch advancement for testing)
++if (process.env.NODE_ENV !== 'production') {
++    app.use('/api', devRouter())
++}
++
+ export default app
+diff --git a/packages/relay/src/routes/anonbook-signup.ts b/packages/relay/src/routes/anonbook-signup.ts
+index 4213fb1..4315412 100644
+--- a/packages/relay/src/routes/anonbook-signup.ts
++++ b/packages/relay/src/routes/anonbook-signup.ts
+@@ -61,6 +61,9 @@ export function signupRouter(db: Database): Router {
+                 const tx = await karmaBridge.userSignUp(publicSignals, proof)
+                 await tx.wait()
+ 
++                // Wait for UserState to sync the signup event
++                await userState.waitForSync()
++
+                 // Store encrypted identity
+                 const encrypted = encryptIdentity(
+                     secret,
+- Current branch: fix/epoch-advance-dev-endpoint
+
+## Your task
+
+Based on the above changes:
+
+1. Create a new branch if on main
+2. Create a single commit with an appropriate message
+3. Push the branch to origin
+4. Create a pull request using `gh pr create`
+5. You have the capability to call multiple tools in a single response. You MUST do all of the above in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
