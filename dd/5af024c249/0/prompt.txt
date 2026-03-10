@@ -1,0 +1,154 @@
+Implement the following plan:
+
+# Anonbook Implementation Plan
+
+## Context
+
+Anonbook is fully designed and planned but has zero implementation code. All 5 chunks need to be built from scratch following the existing detailed plans in `docs/superpowers/plans/`. The project is an anonymous posting service for AI agents using UniRep ZK proofs to verify Moltbook karma without revealing identity.
+
+## Execution Strategy
+
+Use **ralph-loop** (`/ralph-loop`) for each chunk to drive iterative implementation. Each chunk is a well-defined greenfield task with clear success criteria (tests pass, build succeeds) — ideal for ralph-loop.
+
+**Per-chunk workflow:**
+1. Create branch for the chunk
+2. Start ralph-loop with the chunk's plan as prompt and a completion promise (e.g., `"CHUNK N COMPLETE"`)
+3. Ralph iterates: implement step → run tests → see failures → fix → repeat
+4. Once all tests pass and the completion promise fires, commit + push + PR
+5. After merge, proceed to next chunk
+
+Follow the **branch-per-chunk** workflow from CLAUDE.md. Each chunk gets its own branch, commits per step, and a PR when complete.
+
+### Chunk 1: Scaffold + Contract (`chunk-1-scaffold-contract.md`)
+**Branch:** `chunk-1-scaffold-contract`
+**Ralph loop:** `/ralph-loop "Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo, implement KarmaBridge contract with tests. Commit each step. Output <promise>CHUNK 1 COMPLETE</promise> when yarn contracts test passes and deploy script works." --completion-promise "CHUNK 1 COMPLETE" --max-iterations 15`
+
+1. **Scaffold monorepo** — `npx create-unirep-app anonbook-scaffold`, move contents to repo root, `yarn install`, verify build
+2. **Implement KarmaBridge contract** — Write test first (`KarmaBridge.test.ts`), then `KarmaBridge.sol` with `userSignUp()` + `attestKarma()`, update deploy script
+3. **Verify** — `yarn contracts test`, local Hardhat node + deploy
+
+**Key files:** `packages/contracts/contracts/KarmaBridge.sol`, `packages/contracts/test/KarmaBridge.test.ts`, `packages/contracts/deploy/deploy.ts`
+
+**Adaptation notes:**
+- Scaffold may use different UniRep/Semaphore versions than planned — adapt imports accordingly
+- Check `@semaphore-protocol/identity` v3 vs v4 API after scaffold
+- Check `@unirep/contracts` import paths from scaffold's existing code
+
+### Chunk 2: Relay Foundation (`chunk-2-relay-foundation.md`)
+**Branch:** `chunk-2-relay-foundation`
+**Ralph loop:** `/ralph-loop "Implement chunk 2 per docs/superpowers/plans/chunk-2-relay-foundation.md. Config, tiers, SQLite DB, Moltbook client, crosspost service. Commit each step. Output <promise>CHUNK 2 COMPLETE</promise> when yarn relay test passes." --completion-promise "CHUNK 2 COMPLETE" --max-iterations 15`
+
+1. **Config + tiers** — `packages/relay/src/config.ts`, `packages/relay/src/tiers.ts`
+2. **SQLite DB** — Install `better-sqlite3`, write test, implement `db.ts` with `identities` + `posts` tables (never joined)
+3. **Moltbook client** — `packages/relay/src/services/moltbook.ts` with dev-mode stub
+4. **Crosspost service** — `packages/relay/src/services/crosspost.ts` with 30-min cooldown
+
+**Key files:** `packages/relay/src/config.ts`, `packages/relay/src/tiers.ts`, `packages/relay/src/db.ts`, `packages/relay/src/services/moltbook.ts`, `packages/relay/src/services/crosspost.ts`
+
+### Chunk 3: Relay API Routes (`chunk-3-relay-api-routes.md`)
+**Branch:** `chunk-3-relay-api-routes`
+**Ralph loop:** `/ralph-loop "Implement chunk 3 per docs/superpowers/plans/chunk-3-relay-api-routes.md. UniRep service, all 4 API routes with tests, wire Express app. Commit each step. Output <promise>CHUNK 3 COMPLETE</promise> when all relay tests pass." --completion-promise "CHUNK 3 COMPLETE" --max-iterations 20`
+
+1. **UniRep service** — Identity creation, encryption, UserState management, auto epoch transitions
+2. **POST /api/signup** — Moltbook verify → create identity → on-chain signup (test first)
+3. **POST /api/attest** — Karma refresh with epoch key proof (test first)
+4. **POST /api/post** — Anonymous post with reputation proof (test first)
+5. **GET /api/posts** — Cursor-paginated feed with tier filtering (test first)
+6. **Wire Express app** — `app.ts` connecting all routes
+
+**Key files:** `packages/relay/src/services/unirep.ts`, `packages/relay/src/routes/*.ts`, `packages/relay/src/app.ts`, `packages/relay/test/*.test.ts`
+
+### Chunk 4: Terminal UI (`chunk-4-terminal-ui.md`)
+**Branch:** `chunk-4-terminal-ui` — **can run in parallel with Chunk 3**
+**Ralph loop:** `/ralph-loop "Implement chunk 4 per docs/superpowers/plans/chunk-4-terminal-ui.md. Replace scaffold frontend with Ink TUI. Build TierBadge, PostCard, StatusBar, App components. Commit each step. Output <promise>CHUNK 4 COMPLETE</promise> when npx tsx src/index.tsx renders without errors." --completion-promise "CHUNK 4 COMPLETE" --max-iterations 10`
+
+1. **Set up Ink package** — Replace scaffold React frontend with Ink + TypeScript
+2. **Build components** — `TierBadge`, `PostCard`, `StatusBar`, `App` with polling + keyboard controls
+
+**Key files:** `packages/frontend/src/index.tsx`, `packages/frontend/src/App.tsx`, `packages/frontend/src/PostCard.tsx`, `packages/frontend/src/TierBadge.tsx`, `packages/frontend/src/StatusBar.tsx`
+
+### Chunk 5: Integration + E2E (`chunk-5-integration-e2e.md`)
+**Branch:** `chunk-5-integration-e2e`
+**Ralph loop:** `/ralph-loop "Implement chunk 5 per docs/superpowers/plans/chunk-5-integration-e2e.md. Create .env.example, document bot setup. Output <promise>CHUNK 5 COMPLETE</promise> when .env.example exists and e2e steps are documented." --completion-promise "CHUNK 5 COMPLETE" --max-iterations 5`
+
+1. **Moltbook bot setup** — Register bot, create s/anonbook submolt (manual/scripted)
+2. **.env.example** — Document all required env vars
+3. **E2E smoke test** — Full stack: signup → attest → post → feed → TUI display
+
+**Key files:** `packages/relay/.env.example`
+
+## Verification
+
+After each chunk:
+- Run relevant tests (`yarn contracts test`, `yarn relay test`)
+- For Chunk 5: Full E2E with 4 curl commands + TUI verification
+
+## Notes
+
+- Use TDD per chunk plans (write test → fail → implement → pass)
+- Adapt code to actual scaffold versions rather than blindly copying plan snippets
+- Privacy boundary: `identities` and `posts` tables never joined
+- Dev mode works without real Moltbook API key
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/moventsai/.claude/projects/-Users-moventsai-Projects-mine-anonbook/8ce52e0e-1d56-4591-ba90-0a2926b89c27.jsonl
+
+---
+
+# Ralph Loop Command
+
+Execute the setup script to initialize the Ralph loop:
+
+🔄 Ralph loop activated in this session!
+
+Iteration: 1
+Max iterations: 15
+Completion promise: CHUNK 1 COMPLETE (ONLY output when TRUE - do not lie!)
+
+The stop hook is now active. When you try to exit, the SAME PROMPT will be
+fed back to you. You'll see your previous work in files, creating a
+self-referential loop where you iteratively improve on the same task.
+
+To monitor: head -10 .claude/ralph-loop.local.md
+
+⚠️  WARNING: This loop cannot be stopped manually! It will run infinitely
+    unless you set --max-iterations or --completion-promise.
+
+🔄
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+═══════════════════════════════════════════════════════════
+CRITICAL - Ralph Loop Completion Promise
+═══════════════════════════════════════════════════════════
+
+To complete this loop, output this EXACT text:
+  <promise>CHUNK 1 COMPLETE</promise>
+
+STRICT REQUIREMENTS (DO NOT VIOLATE):
+  ✓ Use <promise> XML tags EXACTLY as shown above
+  ✓ The statement MUST be completely and unequivocally TRUE
+  ✓ Do NOT output false statements to exit the loop
+  ✓ Do NOT lie even if you think you should exit
+
+IMPORTANT - Do not circumvent the loop:
+  Even if you believe you're stuck, the task is impossible,
+  or you've been running too long - you MUST NOT output a
+  false promise statement. The loop is designed to continue
+  until the promise is GENUINELY TRUE. Trust the process.
+
+  If the loop should stop, the promise statement will become
+  true naturally. Do not force it by lying.
+═══════════════════════════════════════════════════════════
+
+Please work on the task. When you try to exit, the Ralph loop will feed the SAME PROMPT back to you for the next iteration. You'll see your previous work in files and git history, allowing you to iterate and improve.
+
+CRITICAL RULE: If a completion promise is set, you may ONLY output it when the statement is completely and unequivocally TRUE. Do not output false promises to escape the loop, even if you think you're stuck or should exit for other reasons. The loop is designed to continue until genuine completion.
+
+---
+
+[Request interrupted by user for tool use]
+
+---
+
+we've init the unirep app manually. continue the implementation

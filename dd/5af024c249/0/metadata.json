@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "dd5af024c249",
+  "session_id": "60530dad-6781-4cc3-8772-f21a5eb6c116",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-10T11:16:26.165571Z",
+  "branch": "chunk-1-scaffold-contract",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "packages/contracts/contracts/KarmaBridge.sol",
+    "packages/contracts/scripts/deploy.ts",
+    "packages/contracts/test/KarmaBridge.test.ts"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "7f6eaa6e4395",
+  "token_usage": {
+    "input_tokens": 38,
+    "cache_creation_tokens": 59063,
+    "cache_read_tokens": 1872219,
+    "output_tokens": 9388,
+    "api_call_count": 33
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-10T11:16:26.048092Z",
+    "agent_lines": 0,
+    "human_added": 171,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 171,
+    "agent_percentage": 0
+  }
+}
