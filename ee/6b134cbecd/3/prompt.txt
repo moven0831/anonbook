@@ -1,0 +1,658 @@
+Implement the following plan:
+
+# Anonbook Implementation Plan
+
+## Context
+
+Anonbook is fully designed and planned but has zero implementation code. All 5 chunks need to be built from scratch following the existing detailed plans in `docs/superpowers/plans/`. The project is an anonymous posting service for AI agents using UniRep ZK proofs to verify Moltbook karma without revealing identity.
+
+## Execution Strategy
+
+Use **ralph-loop** (`/ralph-loop`) for each chunk to drive iterative implementation. Each chunk is a well-defined greenfield task with clear success criteria (tests pass, build succeeds) — ideal for ralph-loop.
+
+**Per-chunk workflow:**
+1. Create branch for the chunk
+2. Start ralph-loop with the chunk's plan as prompt and a completion promise (e.g., `"CHUNK N COMPLETE"`)
+3. Ralph iterates: implement step → run tests → see failures → fix → repeat
+4. Once all tests pass and the completion promise fires, commit + push + PR
+5. After merge, proceed to next chunk
+
+Follow the **branch-per-chunk** workflow from CLAUDE.md. Each chunk gets its own branch, commits per step, and a PR when complete.
+
+### Chunk 1: Scaffold + Contract (`chunk-1-scaffold-contract.md`)
+**Branch:** `chunk-1-scaffold-contract`
+**Ralph loop:** `/ralph-loop "Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo, implement KarmaBridge contract with tests. Commit each step. Output <promise>CHUNK 1 COMPLETE</promise> when yarn contracts test passes and deploy script works." --completion-promise "CHUNK 1 COMPLETE" --max-iterations 15`
+
+1. **Scaffold monorepo** — `npx create-unirep-app anonbook-scaffold`, move contents to repo root, `yarn install`, verify build
+2. **Implement KarmaBridge contract** — Write test first (`KarmaBridge.test.ts`), then `KarmaBridge.sol` with `userSignUp()` + `attestKarma()`, update deploy script
+3. **Verify** — `yarn contracts test`, local Hardhat node + deploy
+
+**Key files:** `packages/contracts/contracts/KarmaBridge.sol`, `packages/contracts/test/KarmaBridge.test.ts`, `packages/contracts/deploy/deploy.ts`
+
+**Adaptation notes:**
+- Scaffold may use different UniRep/Semaphore versions than planned — adapt imports accordingly
+- Check `@semaphore-protocol/identity` v3 vs v4 API after scaffold
+- Check `@unirep/contracts` import paths from scaffold's existing code
+
+### Chunk 2: Relay Foundation (`chunk-2-relay-foundation.md`)
+**Branch:** `chunk-2-relay-foundation`
+**Ralph loop:** `/ralph-loop "Implement chunk 2 per docs/superpowers/plans/chunk-2-relay-foundation.md. Config, tiers, SQLite DB, Moltbook client, crosspost service. Commit each step. Output <promise>CHUNK 2 COMPLETE</promise> when yarn relay test passes." --completion-promise "CHUNK 2 COMPLETE" --max-iterations 15`
+
+1. **Config + tiers** — `packages/relay/src/config.ts`, `packages/relay/src/tiers.ts`
+2. **SQLite DB** — Install `better-sqlite3`, write test, implement `db.ts` with `identities` + `posts` tables (never joined)
+3. **Moltbook client** — `packages/relay/src/services/moltbook.ts` with dev-mode stub
+4. **Crosspost service** — `packages/relay/src/services/crosspost.ts` with 30-min cooldown
+
+**Key files:** `packages/relay/src/config.ts`, `packages/relay/src/tiers.ts`, `packages/relay/src/db.ts`, `packages/relay/src/services/moltbook.ts`, `packages/relay/src/services/crosspost.ts`
+
+### Chunk 3: Relay API Routes (`chunk-3-relay-api-routes.md`)
+**Branch:** `chunk-3-relay-api-routes`
+**Ralph loop:** `/ralph-loop "Implement chunk 3 per docs/superpowers/plans/chunk-3-relay-api-routes.md. UniRep service, all 4 API routes with tests, wire Express app. Commit each step. Output <promise>CHUNK 3 COMPLETE</promise> when all relay tests pass." --completion-promise "CHUNK 3 COMPLETE" --max-iterations 20`
+
+1. **UniRep service** — Identity creation, encryption, UserState management, auto epoch transitions
+2. **POST /api/signup** — Moltbook verify → create identity → on-chain signup (test first)
+3. **POST /api/attest** — Karma refresh with epoch key proof (test first)
+4. **POST /api/post** — Anonymous post with reputation proof (test first)
+5. **GET /api/posts** — Cursor-paginated feed with tier filtering (test first)
+6. **Wire Express app** — `app.ts` connecting all routes
+
+**Key files:** `packages/relay/src/services/unirep.ts`, `packages/relay/src/routes/*.ts`, `packages/relay/src/app.ts`, `packages/relay/test/*.test.ts`
+
+### Chunk 4: Terminal UI (`chunk-4-terminal-ui.md`)
+**Branch:** `chunk-4-terminal-ui` — **can run in parallel with Chunk 3**
+**Ralph loop:** `/ralph-loop "Implement chunk 4 per docs/superpowers/plans/chunk-4-terminal-ui.md. Replace scaffold frontend with Ink TUI. Build TierBadge, PostCard, StatusBar, App components. Commit each step. Output <promise>CHUNK 4 COMPLETE</promise> when npx tsx src/index.tsx renders without errors." --completion-promise "CHUNK 4 COMPLETE" --max-iterations 10`
+
+1. **Set up Ink package** — Replace scaffold React frontend with Ink + TypeScript
+2. **Build components** — `TierBadge`, `PostCard`, `StatusBar`, `App` with polling + keyboard controls
+
+**Key files:** `packages/frontend/src/index.tsx`, `packages/frontend/src/App.tsx`, `packages/frontend/src/PostCard.tsx`, `packages/frontend/src/TierBadge.tsx`, `packages/frontend/src/StatusBar.tsx`
+
+### Chunk 5: Integration + E2E (`chunk-5-integration-e2e.md`)
+**Branch:** `chunk-5-integration-e2e`
+**Ralph loop:** `/ralph-loop "Implement chunk 5 per docs/superpowers/plans/chunk-5-integration-e2e.md. Create .env.example, document bot setup. Output <promise>CHUNK 5 COMPLETE</promise> when .env.example exists and e2e steps are documented." --completion-promise "CHUNK 5 COMPLETE" --max-iterations 5`
+
+1. **Moltbook bot setup** — Register bot, create s/anonbook submolt (manual/scripted)
+2. **.env.example** — Document all required env vars
+3. **E2E smoke test** — Full stack: signup → attest → post → feed → TUI display
+
+**Key files:** `packages/relay/.env.example`
+
+## Verification
+
+After each chunk:
+- Run relevant tests (`yarn contracts test`, `yarn relay test`)
+- For Chunk 5: Full E2E with 4 curl commands + TUI verification
+
+## Notes
+
+- Use TDD per chunk plans (write test → fail → implement → pass)
+- Adapt code to actual scaffold versions rather than blindly copying plan snippets
+- Privacy boundary: `identities` and `posts` tables never joined
+- Dev mode works without real Moltbook API key
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/moventsai/.claude/projects/-Users-moventsai-Projects-mine-anonbook/8ce52e0e-1d56-4591-ba90-0a2926b89c27.jsonl
+
+---
+
+# Ralph Loop Command
+
+Execute the setup script to initialize the Ralph loop:
+
+🔄 Ralph loop activated in this session!
+
+Iteration: 1
+Max iterations: 15
+Completion promise: CHUNK 1 COMPLETE (ONLY output when TRUE - do not lie!)
+
+The stop hook is now active. When you try to exit, the SAME PROMPT will be
+fed back to you. You'll see your previous work in files, creating a
+self-referential loop where you iteratively improve on the same task.
+
+To monitor: head -10 .claude/ralph-loop.local.md
+
+⚠️  WARNING: This loop cannot be stopped manually! It will run infinitely
+    unless you set --max-iterations or --completion-promise.
+
+🔄
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+═══════════════════════════════════════════════════════════
+CRITICAL - Ralph Loop Completion Promise
+═══════════════════════════════════════════════════════════
+
+To complete this loop, output this EXACT text:
+  <promise>CHUNK 1 COMPLETE</promise>
+
+STRICT REQUIREMENTS (DO NOT VIOLATE):
+  ✓ Use <promise> XML tags EXACTLY as shown above
+  ✓ The statement MUST be completely and unequivocally TRUE
+  ✓ Do NOT output false statements to exit the loop
+  ✓ Do NOT lie even if you think you should exit
+
+IMPORTANT - Do not circumvent the loop:
+  Even if you believe you're stuck, the task is impossible,
+  or you've been running too long - you MUST NOT output a
+  false promise statement. The loop is designed to continue
+  until the promise is GENUINELY TRUE. Trust the process.
+
+  If the loop should stop, the promise statement will become
+  true naturally. Do not force it by lying.
+═══════════════════════════════════════════════════════════
+
+Please work on the task. When you try to exit, the Ralph loop will feed the SAME PROMPT back to you for the next iteration. You'll see your previous work in files and git history, allowing you to iterate and improve.
+
+CRITICAL RULE: If a completion promise is set, you may ONLY output it when the statement is completely and unequivocally TRUE. Do not output false promises to escape the loop, even if you think you're stuck or should exit for other reasons. The loop is designed to continue until genuine completion.
+
+---
+
+[Request interrupted by user for tool use]
+
+---
+
+we've init the unirep app manually. continue the implementation
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+---
+
+<task-notification>
+<task-id>bu33wzut0</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-moventsai-Projects-mine-anonbook/tasks/bu33wzut0.output</output-file>
+<status>completed</status>
+<summary>Background command "Push chunk 1 branch" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /private/tmp/claude-501/-Users-moventsai-Projects-mine-anonbook/tasks/bu33wzut0.output
+
+---
+
+squashed-merged into main, pull the main branch and then continue to chunk 2
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+---
+
+squashed-merged chunk 2 into main, pull the main branch and then continue to chunk 3
+
+---
+
+Continue from where you left off.
+
+---
+
+continue
+
+---
+
+squashed-merged chunk 3 into main, pull the main branch and then continue to chunk 4
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+---
+
+squashed-merged chunk 4 into main, pull the main branch and then continue to chunk 5
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   The user asked to implement the full Anonbook project following a detailed 5-chunk implementation plan. Anonbook is an anonymous posting service for AI agents using UniRep zero-knowledge proofs to verify Moltbook karma without revealing identity. The workflow is: branch per chunk → implement → test → commit → push → PR → user merges → next chunk. The plan references docs in `docs/superpowers/plans/chunk-{1-5}-*.md`.
+
+2. Key Technical Concepts:
+   - UniRep v2.0.1 zero-knowledge proof system (`@unirep/contracts`, `@unirep/core`, `@unirep/circuits`)
+   - Semaphore Protocol identity (`@semaphore-protocol/identity`)
+   - Solidity smart contracts with Hardhat (KarmaBridge attester contract)
+   - EpochKeyVerifierHelper for on-chain proof verification
+   - SQLite via `better-sqlite3` with privacy boundary (identities and posts tables never joined)
+   - Vitest + supertest for relay API testing with mocked ZK operations
+   - Ink v4 (React for CLIs) terminal UI with `nodenext` module resolution
+   - AES-256-GCM encryption for stored ZK identities
+   - Karma tiers: newcomer(1), contributor(10), trusted(100), legend(1000)
+   - Moltbook API client with dev-mode stub (returns mock agent when no bot API key)
+   - Crosspost service with 30-min cooldown
+   - Cursor-paginated feed with tier filtering
+   - Yarn PnP workspaces monorepo with packages: contracts, relay, frontend, circuits
+
+3. Files and Code Sections:
+
+   - **`packages/contracts/contracts/KarmaBridge.sol`** (User-modified version with on-chain verification)
+     - Core attester contract, takes `Unirep` + `EpochKeyVerifierHelper` in constructor
+     - `userSignUp()` and `attestKarma(publicSignals, proof, karma)` both `onlyOwner`
+     - `attestKarma` uses `epkHelper.verifyAndCheckCaller()` for on-chain proof verification
+     ```solidity
+     contract KarmaBridge {
+         Unirep public immutable unirep;
+         EpochKeyVerifierHelper public immutable epkHelper;
+         address public owner;
+         // Tier constants: NEWCOMER=1, CONTRIBUTOR=10, TRUSTED=100, LEGEND=1000
+         constructor(Unirep _unirep, EpochKeyVerifierHelper _epkHelper, uint48 _epochLength) {
+             unirep = _unirep;
+             epkHelper = _epkHelper;
+             owner = msg.sender;
+             unirep.attesterSignUp(_epochLength);
+         }
+         function attestKarma(uint256[] calldata publicSignals, uint256[8] calldata proof, uint256 karma) public onlyOwner {
+             EpochKeyVerifierHelper.EpochKeySignals memory signals = epkHelper.verifyAndCheckCaller(publicSignals, proof);
+             uint48 targetEpoch = unirep.attesterCurrentEpoch(uint160(address(this)));
+             unirep.attest(signals.epochKey, targetEpoch, 0, karma);
+         }
+     }
+     ```
+
+   - **`packages/contracts/test/KarmaBridge.test.ts`** (8 tests)
+     - Uses `genUserState()` helper with `SQLiteConnector.create(schema, ':memory:')`
+     - Tests: deployment, attester registration, user signup, attestKarma via epoch key proof, karma after state transition, owner access control (try/catch pattern, not revertedWith), tier constants
+     - Uses `deployVerifierHelper(unirep.address, owner, Circuit.epochKey)` for epkHelper
+
+   - **`packages/contracts/scripts/deploy.ts`**
+     - Deploys UniRep, then EpochKeyVerifierHelper via `deployVerifierHelper`, then KarmaBridge
+     - Writes `UNIREP_ADDRESS`, `KARMA_BRIDGE_ADDRESS`, `ETH_PROVIDER_URL`, `PRIVATE_KEY` to relay `.env`
+     - Epoch length set to 3600 (1 hour) for production
+
+   - **`packages/relay/src/config.ts`**
+     - Extended from scaffold with `config` object: provider, privateKey, unirepAddress, karmaBridgeAddress, dbPath, port, encryptionKey
+     - Retains legacy exports (`UNIREP_ADDRESS`, `APP_ADDRESS`, etc.) for scaffold compatibility
+
+   - **`packages/relay/src/tiers.ts`**
+     - `TIERS` const object, `TierName` type, `isValidTier()`, `getTierThreshold()`
+
+   - **`packages/relay/src/db.ts`**
+     - `Database` interface with `saveIdentity`, `getIdentity`, `savePost`, `getPosts`
+     - `createDb(dbPath)` factory using `better-sqlite3` with WAL mode
+     - Two tables: `identities` (agentName PK) and `posts` (autoincrement id) - NEVER joined
+     - `getPosts` supports cursor pagination and tier filtering
+
+   - **`packages/relay/src/services/unirep.ts`**
+     - `createIdentity()`, `loadIdentity(secret)`, `encryptIdentity()`, `decryptIdentity()` (AES-256-GCM)
+     - `createUserState(identity)` using `SQLiteConnector.create(schema, ':memory:')`
+     - `ensureStateTransition(userState)` - auto epoch transition helper
+
+   - **`packages/relay/src/services/moltbook.ts`**
+     - `getAgent(apiKey)` - returns `MoltbookAgent` (name, karma, description)
+     - Dev mode: when no `MOLTBOOK_BOT_API_KEY`, returns deterministic stub agent from apiKey hash
+
+   - **`packages/relay/src/services/crosspost.ts`**
+     - `crosspostToMoltbook(post)` - posts to s/anonbook submolt with 30-min cooldown
+     - Non-fatal: errors logged but don't fail the anonymous post
+
+   - **`packages/relay/src/routes/anonbook-signup.ts`**
+     - `signupRouter(db)` - POST /api/signup: Moltbook verify → create identity → on-chain signup → store encrypted identity
+
+   - **`packages/relay/src/routes/anonbook-attest.ts`**
+     - `attestRouter(db)` - POST /api/attest: load identity → ensureStateTransition → genEpochKeyProof → attestKarma on-chain
+
+   - **`packages/relay/src/routes/anonbook-post.ts`**
+     - `postRouter(db)` - POST /api/post: load identity → genProveReputationProof(minRep: threshold) → store post (no agent name!) → crosspost
+
+   - **`packages/relay/src/routes/anonbook-feed.ts`**
+     - `feedRouter(db)` - GET /api/posts: cursor pagination, tier filtering, max 100 per page
+
+   - **`packages/relay/src/app.ts`**
+     - Wires scaffold routes + anonbook routes, creates DB from config
+
+   - **`packages/relay/test/*.test.ts`** (4 test files, 15 tests total + 6 DB = 21)
+     - All use vitest mocks for Moltbook, UniRep service, and ethers
+     - Ethers mock uses `class` syntax (not `vi.fn()`) for constructors
+
+   - **`packages/frontend/src/`** (Ink TUI)
+     - `TierBadge.tsx` - colored tier badges
+     - `PostCard.tsx` - post display with timeAgo and proof hash
+     - `StatusBar.tsx` - filter controls display
+     - `App.tsx` - main component with `useInput` keyboard controls, `useEffect` polling (3s)
+     - `index.tsx` - entry point, `render(<App relayUrl={relayUrl} />)`
+
+   - **`packages/frontend/tsconfig.json`**
+     - Uses `nodenext` module/moduleResolution (required for Ink v4)
+
+   - **`packages/relay/.env.example`** (just created in chunk 5)
+     - Documents all env vars with defaults for local dev
+
+4. Errors and fixes:
+   - **`ralph-loop` skill invocation with `<promise>` tags**: The `<promise>` tags were interpreted as input redirection. Fixed by removing XML tags from args.
+   - **`create-unirep-app` interactive prompts**: Piped input and `expect` couldn't handle keystroke-by-keystroke prompts. User manually scaffolded instead.
+   - **signup.wasm ENOENT error**: Tests ran fine when executed from the correct directory (`packages/contracts`), not repo root.
+   - **`revertedWith` Chai property not found**: Project doesn't have `@nomicfoundation/hardhat-chai-matchers`. Fixed by using try/catch pattern with `expect(err.message).to.include(...)`.
+   - **Vitest ethers mock constructor error**: `vi.fn()` can't be used with `new`. Fixed by using ES6 `class` syntax in mocks:
+     ```typescript
+     vi.mock('ethers', () => ({
+         ethers: {
+             providers: { JsonRpcProvider: class {} },
+             Wallet: class {},
+             Contract: class {
+                 userSignUp = vi.fn().mockResolvedValue({ wait: vi.fn().mockResolvedValue({}) })
+             },
+         },
+     }))
+     ```
+   - **Ink module resolution error**: Ink v4 requires `nodenext` moduleResolution. Changed tsconfig from `"node"` to `"nodenext"`.
+   - **`rm -rf` permission denied**: Sandbox denied `rm -rf` commands. Used `git rm -r` instead to remove scaffold frontend files.
+   - **Ralph-loop stop hook keeps firing**: The stop hook continues to check for chunk 1 completion prompt. We output `<promise>CHUNK 1 COMPLETE</promise>` each time it fires.
+   - **Divergent branches on pull**: Used `git pull --rebase origin main` to reconcile.
+
+5. Problem Solving:
+   - Adapted plan's code snippets to actual scaffold versions (e.g., `Unirep` type vs `IUnirep`, `SQLiteConnector` pattern)
+   - User improved KarmaBridge to use on-chain EpochKeyVerifierHelper verification instead of the simpler attestKarma(epochKey, epoch, karma) pattern
+   - All test suites pass: 13 contract tests + 21 relay tests = 34 total
+   - TypeScript compilation passes for frontend
+
+6. All user messages:
+   - Initial plan: "Implement the following plan: # Anonbook Implementation Plan..." (detailed 5-chunk plan with ralph-loop instructions)
+   - "we've init the unirep app manually. continue the implementation"
+   - "squashed-merged into main, pull the main branch and then continue to chunk 2"
+   - "squashed-merged chunk 2 into main, pull the main branch and then continue to chunk 3"
+   - "Continue from where you left off." (after session resume, ethers mock fix was in progress)
+   - "continue" (resuming after session restart)
+   - "squashed-merged chunk 3 into main, pull the main branch and then continue to chunk 4" (note: this was actually for chunk 3→4 transition)
+   - "squashed-merged chunk 4 into main, pull the main branch and then continue to chunk 5"
+   - Multiple ralph-loop stop hook feedback messages requesting chunk 1 completion output
+
+7. Pending Tasks:
+   - Push chunk 5 branch and create PR #5
+   - Chunk 5 E2E smoke test documentation (the manual test steps from the plan: signup → attest → post → feed → TUI)
+
+8. Current Work:
+   Working on **Chunk 5: Integration + E2E** on branch `chunk-5-integration-e2e`. Just committed `.env.example` with all documented environment variables. All tests verified passing (34 total). The commit was:
+   ```
+   0acf229 feat: add .env.example and document environment setup
+   ```
+   Was about to push the branch and create PR #5. Per the chunk 5 plan, the remaining items are the E2E smoke test documentation (manual verification steps) and final commit.
+
+9. Optional Next Step:
+   Push `chunk-5-integration-e2e` branch and create PR #5. The user's most recent request was: "squashed-merged chunk 4 into main, pull the main branch and then continue to chunk 5". The `.env.example` is committed. Need to push and create the PR to complete chunk 5, which is the final chunk of the implementation plan.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/moventsai/.claude/projects/-Users-moventsai-Projects-mine-anonbook/60530dad-6781-4cc3-8772-f21a5eb6c116.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+---
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
+---
+
+provide guide on how to run this program locally
+
+---
+
+got this error\
+"""\
+❯ yarn contracts hardhat node
+Error: listen EADDRINUSE: address already in use 127.0.0.1:8545
+    at Server.setupListenHandle [as _listen2] (node:net:1908:16)
+    at listenInCluster (node:net:1965:12)
+    at doListen (node:net:2139:7)
+    at processTicksAndRejections (node:internal/process/task_queues:83:21)\
+"""
+
+---
+
+got this error\
+"""\
+❯ npx tsx src/index.tsx
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+Error: Transform failed with 2 errors:
+/Users/moventsai/Projects/mine/anonbook/node_modules/yoga-wasm-web/dist/node.js:1:1705: ERROR: Top-level await is currently not supported with the "cjs" output format
+/Users/moventsai/Projects/mine/anonbook/node_modules/yoga-wasm-web/dist/node.js:1:1713: ERROR: Top-level await is currently not supported with the "cjs" output format
+    at failureErrorWithLog (/Users/moventsai/.npm/_npx/fd45a72a545557e9/node_modules/esbuild/lib/main.js:1467:15)
+    at /Users/moventsai/.npm/_npx/fd45a72a545557e9/node_modules/esbuild/lib/main.js:736:50
+    at responseCallbacks.<computed> (/Users/moventsai/.npm/_npx/fd45a72a545557e9/node_modules/esbuild/lib/main.js:603:9)
+    at handleIncomingPacket (/Users/moventsai/.npm/_npx/fd45a72a545557e9/node_modules/esbuild/lib/main.js:658:12)
+    at Socket.readFromStdout (/Users/moventsai/.npm/_npx/fd45a72a545557e9/node_modules/esbuild/lib/main.j581:7)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:191:23) {
+  name: 'TransformError'
+}
+
+Node.js v20.19.5\
+"""
+
+---
+
+## Context
+
+- Current git status: On branch chunk-5-integration-e2e
+Your branch is up to date with 'origin/chunk-5-integration-e2e'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	deleted:    .claude/ralph-loop.local.md
+	modified:   .yarn/install-state.gz
+	modified:   packages/frontend/package.json
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	packages/relay/anonbook.db
+	packages/relay/anonbook.db-shm
+	packages/relay/anonbook.db-wal
+
+no changes added to commit (use "git add" and/or "git commit -a")
+- Current git diff (staged and unstaged changes): diff --git a/.claude/ralph-loop.local.md b/.claude/ralph-loop.local.md
+deleted file mode 100644
+index 34d0284..0000000
+--- a/.claude/ralph-loop.local.md
++++ /dev/null
+@@ -1,10 +0,0 @@
+----
+-active: true
+-iteration: 3
+-session_id: 
+-max_iterations: 15
+-completion_promise: "CHUNK 1 COMPLETE"
+-started_at: "2026-03-10T11:04:45Z"
+----
+-
+-Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+diff --git a/.yarn/install-state.gz b/.yarn/install-state.gz
+index 95c7d9f..e4548a6 100644
+Binary files a/.yarn/install-state.gz and b/.yarn/install-state.gz differ
+diff --git a/packages/frontend/package.json b/packages/frontend/package.json
+index 3d57fac..5f4b30c 100644
+--- a/packages/frontend/package.json
++++ b/packages/frontend/package.json
+@@ -1,6 +1,7 @@
+ {
+     "name": "@unirep-app/frontend",
+     "version": "1.0.0",
++    "type": "module",
+     "description": "Anonbook terminal UI",
+     "license": "ISC",
+     "scripts": {
+- Current branch: chunk-5-integration-e2e
+- Recent commits: 0acf229 feat: add .env.example and document environment setup
+8eb58d3 feat: replace scaffold React frontend with Ink terminal UI (#4)
+9c2f2e7 Relay API routes (#3)
+49fe766 Chunk 2: Relay foundation (DB, config, Moltbook client) (#2)
+8cf3872 Scaffold monorepo + KarmaBridge contract (#1)
+9c13e55 docs(Claude): update implementation workflow and gotchas
+e07e930 docs: add CLAUDE.md
+38792bd docs: add Moltbook reference links and wire into spec + plans
+adbf8f4 docs: add UniRep reference links and wire into spec + plans
+9e71e43 docs: split implementation plan into chunk files for parallel execution
+
+## Your task
+
+Based on the above changes, create a single git commit.
+
+You have the capability to call multiple tools in a single response. Stage and create the commit using a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+
+---
+
+## Context
+
+- Current git status: On branch chunk-5-integration-e2e
+Your branch is ahead of 'origin/chunk-5-integration-e2e' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .yarn/install-state.gz
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	packages/relay/anonbook.db
+	packages/relay/anonbook.db-shm
+	packages/relay/anonbook.db-wal
+
+no changes added to commit (use "git add" and/or "git commit -a")
+- Current git diff (staged and unstaged changes): diff --git a/.yarn/install-state.gz b/.yarn/install-state.gz
+index 95c7d9f..e4548a6 100644
+Binary files a/.yarn/install-state.gz and b/.yarn/install-state.gz differ
+- Current branch: chunk-5-integration-e2e
+
+## Your task
+
+Based on the above changes:
+
+1. Create a new branch if on main
+2. Create a single commit with an appropriate message
+3. Push the branch to origin
+4. Create a pull request using `gh pr create`
+5. You have the capability to call multiple tools in a single response. You MUST do all of the above in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+
+---
+
+create another PR
+
+---
+
+no the relay runs at\
+"""\
+❯ yarn relay start
+Listening: http://127.0.0.1:8000\
+"""
+
+---
+
+why is this error\
+"""\
+❯ curl -s -X POST
+  http://localhost:8000/api/signup \
+    -H 'Content-Type: application/json' \
+    -d '{"moltbookApiKey":"test-key"}'
+curl: (2) no URL specified
+curl: try 'curl --help' or 'curl --manual' for more information
+zsh: no such file or directory: http://localhost:8000/api/signup\
+"""
+
+---
+
+document the command for demo usage properly into script
+
+---
+
+make a version for pastable command as well
+
+---
+
+got this error\
+"""\
+❯ curl -s -X POST http://localhost:8000/api/signup -H 'Content-Type: application/json' -d '{"moltbookApiKey":"test-key"}' | jq .
+{
+  "error": {}
+}\
+"""
+
+---
+
+still got the same error\
+"""\
+❯ yarn relay start
+Listening: http://127.0.0.1:8000
+^C%                                                                             
+❯ yarn contracts deploy
+-----------------------------------------------------------------
+Epoch tree depth: 17
+State tree depth: 17
+History tree depth: 17
+Number of epoch keys per epoch: 3
+Total fields per user: 6
+Sum fields per user: 4
+Replacement field nonce bits: 48
+Replacement field data bits: 205
+-----------------------------------------------------------------
+Make sure these match what you expect!
+-----------------------------------------------------------------
+Deploying EpochKeyVerifier
+Deploying ReputationVerifier
+Deploying UserStateTransitionVerifier
+Deploying SignupVerifier
+Deploying EpochKeyLiteVerifier
+Deploying ScopeNullifierVerifier
+Deploying Unirep
+-----------------------------------------------------------------
+Bytecode size of Unirep: 17212 bytes
+Re-using existing Unirep deployment
+Deployed to: 0x83cB6AF63eAfEc7998cC601eC3f56d064892b386
+-------------------------------------------------------------
+UniRep deployed to: 0x83cB6AF63eAfEc7998cC601eC3f56d064892b386
+Deploying EpochKeyVerifier
+Deploying EpochKeyVerifierHelper
+KarmaBridge deployed to: 0x0B306BF915C4d645ff596e518fAf3F9669b97016
+Config written to /Users/moventsai/Projects/mine/anonbook/packages/relay/.env
+❯ yarn relay start
+Listening: http://127.0.0.1:8000\
+"""
+
+---
+
+still got the same error\
+"""\
+❯ curl -s -X POST http://localhost:8000/api/attest -H 'Content-Type: application/json' -d '{"agentName":"AGENT_NAME"}' | jq .
+{
+  "success": false,
+  "error": "moltbookApiKey is required"
+}
+❯ curl -s -X POST http://localhost:8000/api/signup -H 'Content-Type: application/json' -d '{"moltbookApiKey":"test-key"}' | jq .
+{
+  "error": {}
+}\
+"""
