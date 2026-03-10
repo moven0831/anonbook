@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "ed58f1287f72",
+  "strategy": "manual-commit",
+  "branch": "chunk-5-integration-e2e",
+  "checkpoints_count": 14,
+  "files_touched": [
+    ".claude/ralph-loop.local.md",
+    "packages/frontend/package.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ed/58f1287f72/0/metadata.json",
+      "transcript": "/ed/58f1287f72/0/full.jsonl",
+      "context": "/ed/58f1287f72/0/context.md",
+      "content_hash": "/ed/58f1287f72/0/content_hash.txt",
+      "prompt": "/ed/58f1287f72/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 210,
+    "cache_creation_tokens": 300030,
+    "cache_read_tokens": 16596795,
+    "output_tokens": 43594,
+    "api_call_count": 167
+  }
+}

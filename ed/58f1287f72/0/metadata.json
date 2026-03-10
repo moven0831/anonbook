@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "ed58f1287f72",
+  "session_id": "60530dad-6781-4cc3-8772-f21a5eb6c116",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-10T11:57:22.873415Z",
+  "branch": "chunk-5-integration-e2e",
+  "checkpoints_count": 14,
+  "files_touched": [
+    ".claude/ralph-loop.local.md",
+    "packages/frontend/package.json"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "ae6dc0a7f774",
+  "token_usage": {
+    "input_tokens": 210,
+    "cache_creation_tokens": 300030,
+    "cache_read_tokens": 16596795,
+    "output_tokens": 43594,
+    "api_call_count": 167
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-10T11:57:22.496148Z",
+    "agent_lines": 0,
+    "human_added": 1326,
+    "human_modified": 7,
+    "human_removed": 0,
+    "total_committed": 1332,
+    "agent_percentage": 0
+  }
+}
