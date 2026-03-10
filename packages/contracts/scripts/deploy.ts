@@ -1,10 +1,14 @@
 import { ethers } from 'hardhat'
 import * as fs from 'fs'
 import * as path from 'path'
-import { deployUnirep } from '@unirep/contracts/deploy/index.js'
+import {
+    deployUnirep,
+    deployVerifierHelper,
+} from '@unirep/contracts/deploy/index.js'
+import { Circuit } from '@unirep/circuits'
 import * as hardhat from 'hardhat'
 
-const epochLength = 300
+const epochLength = 3600
 
 deployApp().catch((err) => {
     console.log(`Uncaught error: ${err}`)
@@ -15,38 +19,33 @@ export async function deployApp() {
     const [signer] = await ethers.getSigners()
     const unirep = await deployUnirep(signer)
 
-    const verifierF = await ethers.getContractFactory('DataProofVerifier')
-    const verifier = await verifierF.deploy()
-    await verifier.deployed()
-    const App = await ethers.getContractFactory('UnirepApp')
-    const app = await App.deploy(unirep.address, verifier.address, epochLength)
+    console.log(`UniRep deployed to: ${unirep.address}`)
 
-    await app.deployed()
-
-    console.log(
-        `Unirep app with epoch length ${epochLength} is deployed to ${app.address}`
+    const epkHelper = await deployVerifierHelper(
+        unirep.address,
+        signer,
+        Circuit.epochKey
     )
 
-    // Deploy KarmaBridge
     const KarmaBridge = await ethers.getContractFactory('KarmaBridge')
-    const karmaBridge = await KarmaBridge.deploy(unirep.address, epochLength)
+    const karmaBridge = await KarmaBridge.deploy(
+        unirep.address,
+        epkHelper.address,
+        epochLength
+    )
     await karmaBridge.deployed()
 
     console.log(`KarmaBridge deployed to: ${karmaBridge.address}`)
 
-    const config = `
-    UNIREP_ADDRESS='${unirep.address}'
-    APP_ADDRESS='${app.address}'
-    KARMA_BRIDGE_ADDRESS='${karmaBridge.address}'
-    ETH_PROVIDER_URL='${hardhat.network.config.url ?? ''}'
-    ${
-        Array.isArray(hardhat.network.config.accounts)
-            ? `PRIVATE_KEY='${hardhat.network.config.accounts[0]}'`
-            : `/**
-      This contract was deployed using a mnemonic. The PRIVATE_KEY variable needs to be set manually
-    **/`
-    }
-  `
+    const config = `UNIREP_ADDRESS='${unirep.address}'
+KARMA_BRIDGE_ADDRESS='${karmaBridge.address}'
+ETH_PROVIDER_URL='${hardhat.network.config.url ?? ''}'
+${
+    Array.isArray(hardhat.network.config.accounts)
+        ? `PRIVATE_KEY='${hardhat.network.config.accounts[0]}'`
+        : `# This contract was deployed using a mnemonic. Set PRIVATE_KEY manually.`
+}
+`
 
     const configPath = path.join(__dirname, '../../relay/.env')
     await fs.promises.writeFile(configPath, config)

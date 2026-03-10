@@ -2,13 +2,14 @@
 pragma solidity ^0.8.0;
 
 import {Unirep} from "@unirep/contracts/Unirep.sol";
+import {EpochKeyVerifierHelper} from "@unirep/contracts/verifierHelpers/EpochKeyVerifierHelper.sol";
 
 contract KarmaBridge {
     Unirep public immutable unirep;
+    EpochKeyVerifierHelper public immutable epkHelper;
 
     address public owner;
 
-    // Tier thresholds (for reference; proofs are verified on-chain)
     uint256 public constant NEWCOMER = 1;
     uint256 public constant CONTRIBUTOR = 10;
     uint256 public constant TRUSTED = 100;
@@ -19,8 +20,13 @@ contract KarmaBridge {
         _;
     }
 
-    constructor(Unirep _unirep, uint48 _epochLength) {
+    constructor(
+        Unirep _unirep,
+        EpochKeyVerifierHelper _epkHelper,
+        uint48 _epochLength
+    ) {
         unirep = _unirep;
+        epkHelper = _epkHelper;
         owner = msg.sender;
         unirep.attesterSignUp(_epochLength);
     }
@@ -33,11 +39,17 @@ contract KarmaBridge {
     }
 
     function attestKarma(
-        uint256 epochKey,
-        uint48 targetEpoch,
+        uint256[] calldata publicSignals,
+        uint256[8] calldata proof,
         uint256 karma
     ) public onlyOwner {
-        // Attest karma into data[0]
-        unirep.attest(epochKey, targetEpoch, 0, karma);
+        EpochKeyVerifierHelper.EpochKeySignals memory signals =
+            epkHelper.verifyAndCheckCaller(publicSignals, proof);
+
+        uint48 targetEpoch = unirep.attesterCurrentEpoch(
+            uint160(address(this))
+        );
+
+        unirep.attest(signals.epochKey, targetEpoch, 0, karma);
     }
 }
