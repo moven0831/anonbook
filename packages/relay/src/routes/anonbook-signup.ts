@@ -61,6 +61,9 @@ export function signupRouter(db: Database): Router {
                 const tx = await karmaBridge.userSignUp(publicSignals, proof)
                 await tx.wait()
 
+                // Wait for UserState to sync the signup event
+                await userState.waitForSync()
+
                 // Store encrypted identity
                 const encrypted = encryptIdentity(
                     secret,

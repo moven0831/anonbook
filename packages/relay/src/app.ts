@@ -7,6 +7,7 @@ import { signupRouter } from './routes/anonbook-signup'
 import { attestRouter } from './routes/anonbook-attest'
 import { postRouter } from './routes/anonbook-post'
 import { feedRouter } from './routes/anonbook-feed'
+import { devRouter } from './routes/dev'
 
 require('dotenv').config()
 
@@ -31,5 +32,10 @@ app.use('/api', signupRouter(db))
 app.use('/api', attestRouter(db))
 app.use('/api', postRouter(db))
 app.use('/api', feedRouter(db))
+
+// Dev-only routes (epoch advancement for testing)
+if (process.env.NODE_ENV !== 'production') {
+    app.use('/api', devRouter())
+}
 
 export default app
