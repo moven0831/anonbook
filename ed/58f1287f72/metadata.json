@@ -3,7 +3,7 @@
   "checkpoint_id": "ed58f1287f72",
   "strategy": "manual-commit",
   "branch": "chunk-5-integration-e2e",
-  "checkpoints_count": 14,
+  "checkpoints_count": 18,
   "files_touched": [
     ".claude/ralph-loop.local.md",
     "packages/frontend/package.json"
@@ -15,6 +15,13 @@
       "context": "/ed/58f1287f72/0/context.md",
       "content_hash": "/ed/58f1287f72/0/content_hash.txt",
       "prompt": "/ed/58f1287f72/0/prompt.txt"
+    },
+    {
+      "metadata": "/ed/58f1287f72/1/metadata.json",
+      "transcript": "/ed/58f1287f72/1/full.jsonl",
+      "context": "/ed/58f1287f72/1/context.md",
+      "content_hash": "/ed/58f1287f72/1/content_hash.txt",
+      "prompt": "/ed/58f1287f72/1/prompt.txt"
     }
   ],
   "token_usage": {
