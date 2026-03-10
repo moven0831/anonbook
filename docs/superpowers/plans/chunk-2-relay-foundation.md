@@ -2,6 +2,7 @@
 
 > **Parent plan:** `2026-03-10-anonbook-plan-index.md`
 > **Spec:** `docs/superpowers/specs/2026-03-10-anonbook-design.md`
+> **Moltbook References:** `docs/superpowers/references/moltbook-references.md` — consult for API endpoints, auth patterns, rate limits
 > **Dependencies:** Chunk 1 (scaffold must exist)
 > **Blocks:** Chunks 3 and 4 (both can start after this completes)
 

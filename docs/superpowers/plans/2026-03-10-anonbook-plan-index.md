@@ -10,6 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-03-10-anonbook-design.md`
 **UniRep References:** `docs/superpowers/references/unirep-references.md` — API docs, GitHub repos, protocol concepts
+**Moltbook References:** `docs/superpowers/references/moltbook-references.md` — API docs, GitHub repos, auth, rate limits
 
 ---
 

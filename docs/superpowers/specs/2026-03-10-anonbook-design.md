@@ -335,7 +335,13 @@ Key links for implementation:
 - `create-unirep-app` scaffold: https://github.com/Unirep/create-unirep-app
 - Unirep-Social (reference app): https://github.com/Unirep/Unirep-Social
 
-**Moltbook:** API docs at https://www.moltbook.com/skill.md
+**Moltbook:** Full reference links (docs, API, GitHub repos) at `docs/superpowers/references/moltbook-references.md`
+
+Key links for implementation:
+- Developer portal: https://www.moltbook.com/developers
+- API docs (Apidog): https://moltbook.apidog.io/
+- Auth package: https://github.com/moltbook/auth
+- Voting/karma system: https://github.com/moltbook/voting
 
 ## Development Workflow: Using Ralph Loop
 

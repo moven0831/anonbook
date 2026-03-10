@@ -2,6 +2,7 @@
 
 > **Parent plan:** `2026-03-10-anonbook-plan-index.md`
 > **Spec:** `docs/superpowers/specs/2026-03-10-anonbook-design.md`
+> **Moltbook References:** `docs/superpowers/references/moltbook-references.md` — consult for bot registration, submolt creation, crosspost API
 > **Dependencies:** Chunks 3 AND 4 (all relay routes + TUI must be complete)
 > **Blocks:** None — this is the final chunk
 
