@@ -2,6 +2,7 @@
 
 > **Parent plan:** `2026-03-10-anonbook-plan-index.md`
 > **Spec:** `docs/superpowers/specs/2026-03-10-anonbook-design.md`
+> **UniRep References:** `docs/superpowers/references/unirep-references.md` — consult for `@unirep/core` UserState API, proof generation (`genEpochKeyProof`, `genProveReputationProof`, `genUserSignUpProof`), and `@unirep/circuits` defaultProver
 > **Dependencies:** Chunk 2 (DB, config, tiers, Moltbook client, crosspost service must exist)
 > **Blocks:** Chunk 5
 > **Parallel with:** Chunk 4 (Terminal UI) — no shared state

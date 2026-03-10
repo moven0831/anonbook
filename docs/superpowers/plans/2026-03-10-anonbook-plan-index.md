@@ -9,6 +9,7 @@
 **Tech Stack:** Solidity/Hardhat, TypeScript, Express, SQLite (better-sqlite3), Ink (React for CLIs), UniRep (@unirep/core, @unirep/contracts, @unirep/circuits), Semaphore identity
 
 **Spec:** `docs/superpowers/specs/2026-03-10-anonbook-design.md`
+**UniRep References:** `docs/superpowers/references/unirep-references.md` — API docs, GitHub repos, protocol concepts
 
 ---
 

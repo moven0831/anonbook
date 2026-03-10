@@ -2,6 +2,7 @@
 
 > **Parent plan:** `2026-03-10-anonbook-plan-index.md`
 > **Spec:** `docs/superpowers/specs/2026-03-10-anonbook-design.md`
+> **UniRep References:** `docs/superpowers/references/unirep-references.md` — consult for contract APIs (`@unirep/contracts`), deploy helpers, and `create-unirep-app` scaffold structure
 > **Dependencies:** None — this is the first chunk
 > **Blocks:** Chunk 2, 3, 4, 5
 

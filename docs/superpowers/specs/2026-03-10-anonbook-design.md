@@ -325,6 +325,18 @@ Any dapp can verify KarmaBridge proofs without interacting with anonbook. Potent
 ### Mainnet Deployment
 Move from Hardhat/testnet to L2 mainnet (Arbitrum, Base, etc.) for production use.
 
+## References
+
+**UniRep:** Full reference links (docs, API, GitHub repos, tools) at `docs/superpowers/references/unirep-references.md`
+
+Key links for implementation:
+- `@unirep/core` API (UserState, proof generation): https://developer.unirep.io/docs/core-api/
+- `@unirep/contracts` API (IUnirep, verifiers): https://developer.unirep.io/docs/contracts-api/
+- `create-unirep-app` scaffold: https://github.com/Unirep/create-unirep-app
+- Unirep-Social (reference app): https://github.com/Unirep/Unirep-Social
+
+**Moltbook:** API docs at https://www.moltbook.com/skill.md
+
 ## Development Workflow: Using Ralph Loop
 
 Ralph Loop is an iterative AI development technique where the same prompt is fed to Claude Code repeatedly. Each iteration sees the previous work in files and git history, enabling systematic improvement.
