@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "ce0436419f73",
+  "strategy": "manual-commit",
+  "branch": "dev",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".yarn/install-state.gz",
+    "CLAUDE.md",
+    "docs/superpowers/plans/chunk-5-integration-e2e.md",
+    "packages/relay/src/app.ts",
+    "packages/relay/src/index.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ce/0436419f73/0/metadata.json",
+      "transcript": "/ce/0436419f73/0/full.jsonl",
+      "context": "/ce/0436419f73/0/context.md",
+      "content_hash": "/ce/0436419f73/0/content_hash.txt",
+      "prompt": "/ce/0436419f73/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 6,
+    "cache_creation_tokens": 15849,
+    "cache_read_tokens": 75905,
+    "output_tokens": 990,
+    "api_call_count": 4
+  }
+}

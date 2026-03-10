@@ -1,0 +1,35 @@
+Implement the following plan:
+
+# Plan: Fix relay port to 3000
+
+## Context
+The relay server listens on port 8000 because `index.ts` has its own hardcoded default (`8000`) instead of using `config.port` (which correctly defaults to `3000`). The frontend already expects `localhost:3000`. This mismatch causes the "Cannot reach relay" error in the TUI.
+
+## Changes
+
+### 1. Fix `packages/relay/src/index.ts`
+Use `config.port` instead of the hardcoded `process.env.PORT || 8000`:
+```ts
+import app from './app'
+import { config } from './config'
+
+app.listen(config.port, () => {
+    console.log(`Listening: http://127.0.0.1:${config.port}`)
+})
+```
+
+### 2. Fix `docs/superpowers/plans/chunk-5-integration-e2e.md`
+- Change all `http://localhost:8000/api/` URLs back to `http://localhost:3000/api/` (4 occurrences)
+- Change `PORT=8000` to `PORT=3000` in the `.env.example` snippet
+- Remove "(listens on port 8000)" note from Terminal 3 line (or change to 3000)
+
+### 3. Fix `CLAUDE.md`
+- Change `PORT` env var line from `default: 8000` to `default: 3000`
+
+## Verification
+1. `yarn relay start` → should print `Listening: http://127.0.0.1:3000`
+2. `npx tsx src/index.tsx` in frontend → should connect without "Cannot reach relay" error
+3. `curl http://localhost:3000/api/posts` → should respond
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/moventsai/.claude/projects/-Users-moventsai-Projects-mine-anonbook/258eac11-690a-479c-b97b-86a69f51b677.jsonl
