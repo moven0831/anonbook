@@ -27,9 +27,17 @@ export async function deployApp() {
         `Unirep app with epoch length ${epochLength} is deployed to ${app.address}`
     )
 
+    // Deploy KarmaBridge
+    const KarmaBridge = await ethers.getContractFactory('KarmaBridge')
+    const karmaBridge = await KarmaBridge.deploy(unirep.address, epochLength)
+    await karmaBridge.deployed()
+
+    console.log(`KarmaBridge deployed to: ${karmaBridge.address}`)
+
     const config = `
     UNIREP_ADDRESS='${unirep.address}'
     APP_ADDRESS='${app.address}'
+    KARMA_BRIDGE_ADDRESS='${karmaBridge.address}'
     ETH_PROVIDER_URL='${hardhat.network.config.url ?? ''}'
     ${
         Array.isArray(hardhat.network.config.accounts)
