@@ -44,3 +44,9 @@ To monitor: head -10 .claude/ralph-loop.local.md
 
 we've init the unirep app manually. continue the implementation
 
+### Prompt 5
+
+Stop hook feedback:
+
+Implement chunk 1 per docs/superpowers/plans/chunk-1-scaffold-contract.md. Scaffold monorepo via create-unirep-app, implement KarmaBridge contract with tests, update deploy script. Commit each step. Output CHUNK 1 COMPLETE when yarn contracts test passes and deploy script works.
+
