@@ -1,0 +1,56 @@
+Implement the following plan:
+
+# Fix: Address PR #7 review feedback
+
+## Context
+
+PR #7 (`fix/epoch-advance-dev-endpoint`) received two review comments from Greptile. Both are valid and straightforward to fix.
+
+## Changes
+
+### 1. Dynamic import of `devRouter` in `packages/relay/src/app.ts`
+
+**Problem**: Static `import { devRouter } from './routes/dev'` at line 10 loads the dev module into the Node.js runtime even in production, despite the route mount being guarded.
+
+**Fix**: Remove the static import (line 10) and use dynamic `require` inside the `NODE_ENV` guard:
+
+```ts
+// Dev-only routes (epoch advancement for testing)
+if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { devRouter } = require('./routes/dev')
+    app.use('/api', devRouter())
+}
+```
+
+### 2. Advance by `epochLength + 1` in `packages/relay/src/routes/dev.ts`
+
+**Problem**: Advancing by exactly `epochLength` may land on the precise epoch boundary. Whether UniRep treats this as a new epoch depends on `>` vs `>=` comparison internally.
+
+**Fix**: Change line 23 from:
+```ts
+await provider.send('evm_increaseTime', [Number(epochLength)])
+```
+to:
+```ts
+await provider.send('evm_increaseTime', [Number(epochLength) + 1])
+```
+
+## Files to modify
+
+| File | Change |
+|------|--------|
+| `packages/relay/src/app.ts` | Remove static import, use dynamic `require` inside guard |
+| `packages/relay/src/routes/dev.ts` | `epochLength + 1` for reliable boundary crossing |
+
+## Verification
+
+1. `cd packages/relay && npx tsc --noEmit` — type-check passes
+2. Commit, push, verify review comments addressed
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/moventsai/.claude/projects/-Users-moventsai-Projects-mine-anonbook/9d578154-d8d8-4a20-96bd-31d4adb5e174.jsonl
+
+---
+
+yes

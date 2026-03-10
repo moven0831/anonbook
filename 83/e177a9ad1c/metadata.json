@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "83e177a9ad1c",
+  "strategy": "manual-commit",
+  "branch": "fix/epoch-advance-dev-endpoint",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "packages/relay/src/app.ts",
+    "packages/relay/src/routes/dev.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/83/e177a9ad1c/0/metadata.json",
+      "transcript": "/83/e177a9ad1c/0/full.jsonl",
+      "context": "/83/e177a9ad1c/0/context.md",
+      "content_hash": "/83/e177a9ad1c/0/content_hash.txt",
+      "prompt": "/83/e177a9ad1c/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 10,
+    "cache_creation_tokens": 13948,
+    "cache_read_tokens": 114448,
+    "output_tokens": 1134,
+    "api_call_count": 6
+  }
+}
