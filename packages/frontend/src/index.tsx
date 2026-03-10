@@ -1,26 +1,8 @@
+#!/usr/bin/env node
 import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Header from './pages/Header'
-import Start from './pages/Start'
-import Dashboard from './pages/Dashboard'
-import './index.css'
+import { render } from 'ink'
+import { App } from './App'
 
-export default function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Header />}>
-                    <Route index element={<Start />} />
-                    <Route path="dashboard" element={<Dashboard />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
-    )
-}
+const relayUrl = process.argv[2] || 'http://localhost:3000'
 
-const rootElement = document.getElementById('root')
-if (rootElement) {
-    const root = createRoot(rootElement)
-    root.render(<App />)
-}
+render(<App relayUrl={relayUrl} />)
