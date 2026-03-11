@@ -67,7 +67,7 @@ export function postRouter(db: Database): Router {
                     '0x' +
                     crypto
                         .createHash('sha256')
-                        .update(JSON.stringify({ publicSignals, proof }))
+                        .update(JSON.stringify({ publicSignals, proof }, (_, v) => typeof v === 'bigint' ? v.toString() : v))
                         .digest('hex')
 
                 // Store anonymous post (NO agent name)
@@ -76,8 +76,8 @@ export function postRouter(db: Database): Router {
                     content,
                     tier,
                     proofHash,
-                    publicSignals: JSON.stringify(publicSignals),
-                    proof: JSON.stringify(proof),
+                    publicSignals: JSON.stringify(publicSignals, (_, v) => typeof v === 'bigint' ? v.toString() : v),
+                    proof: JSON.stringify(proof, (_, v) => typeof v === 'bigint' ? v.toString() : v),
                 })
 
                 // Cross-post to Moltbook (fire and forget)
@@ -93,6 +93,7 @@ export function postRouter(db: Database): Router {
 
                 res.json({ success: true, postId })
             } catch (proofErr: any) {
+                console.error('[post] Proof generation error:', proofErr)
                 const currentEpoch = await userState
                     .latestTransitionedEpoch()
                     .catch(() => 0)
@@ -100,8 +101,9 @@ export function postRouter(db: Database): Router {
                     success: false,
                     error: 'attestation_stale',
                     message:
-                        'Proof generation failed. Call /api/attest to refresh karma for current epoch, or verify your karma meets the tier threshold.',
+                        'Proof generation failed. Call /api/attest to refresh karma for current epoch, then /api/dev/advance-epoch, then retry. Attestations are only usable after an epoch transition.',
                     epoch: Number(currentEpoch),
+                    detail: proofErr.message,
                 })
             } finally {
                 userState.stop()

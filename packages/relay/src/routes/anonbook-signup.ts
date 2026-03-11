@@ -44,8 +44,10 @@ export function signupRouter(db: Database): Router {
             // Generate signup proof and submit on-chain
             const userState = await createUserState(identity)
             try {
+                // Explicitly pass current epoch — new identities default to epoch 0
+                const epoch = await userState.sync.loadCurrentEpoch()
                 const { publicSignals, proof } =
-                    await userState.genUserSignUpProof()
+                    await userState.genUserSignUpProof({ epoch })
 
                 const provider = new ethers.providers.JsonRpcProvider(
                     config.provider
@@ -71,11 +73,11 @@ export function signupRouter(db: Database): Router {
                 )
                 db.saveIdentity(agent.name, encrypted, commitment)
 
-                const epoch = await userState.latestTransitionedEpoch()
+                const signedUpEpoch = await userState.latestTransitionedEpoch()
                 res.json({
                     success: true,
                     attesterId: config.karmaBridgeAddress,
-                    epoch: Number(epoch),
+                    epoch: Number(signedUpEpoch),
                 })
             } finally {
                 userState.stop()
