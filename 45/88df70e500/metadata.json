@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "4588df70e500",
+  "strategy": "manual-commit",
+  "branch": "docs/update-readme-demo-flow",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "README.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/45/88df70e500/0/metadata.json",
+      "transcript": "/45/88df70e500/0/full.jsonl",
+      "context": "/45/88df70e500/0/context.md",
+      "content_hash": "/45/88df70e500/0/content_hash.txt",
+      "prompt": "/45/88df70e500/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 14,
+    "cache_creation_tokens": 35289,
+    "cache_read_tokens": 316747,
+    "output_tokens": 2465,
+    "api_call_count": 11
+  }
+}
